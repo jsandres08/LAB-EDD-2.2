@@ -1,2 +1,2 @@
-package modelo;
+package arboldecision;
 public enum TipoNodo { PUBLICACION, PREGUNTA, RESULTADO }

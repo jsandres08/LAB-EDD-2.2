@@ -1,4 +1,4 @@
-package modelo;
+package arboldecision;
 import java.util.*;
 public class NodoDecision{
  private String texto; private TipoNodo tipo;
