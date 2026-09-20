@@ -9,6 +9,9 @@ import arbolclasificacion.Publicacion;
 import arboldecision.ArbolDecision;
 import arboldecision.NodoDecision;
 import arboldecision.TipoNodo;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -36,6 +39,10 @@ public class GameEngine {
 
     public Jugador getJugadorActual() {
         return partida.jugadorActual();
+    }
+    
+    public List<Jugador> getTodosLosJugadores() {
+        return partida.getJugadores();
     }
 
     public void procesarDecision(String opcion) {
@@ -85,4 +92,32 @@ public class GameEngine {
     public void reiniciarArbolDecision() {
         arbolDecision.reiniciar();
     } 
+      public String obtenerRecorridoArbolDecision() {
+        return capturarSalidaConsola(() -> arbolDecision.recorrerDFS());
+    }
+ 
+    /**
+     * Devuelve como texto el recorrido preorden del árbol de clasificación,
+     * tal como lo imprime ArbolClasi.recorrerPreorden().
+     */
+    public String obtenerRecorridoArbolClasificacion() {
+        return capturarSalidaConsola(() -> arbolClasificacion.recorrerPreorden());
+    }
+ 
+    /**
+     * Redirige temporalmente System.out para capturar lo que imprime un
+     * método existente (recorrerDFS, recorrerPreorden, etc.) y devolverlo
+     * como String, sin tener que modificar esas clases de otros integrantes.
+     */
+    private String capturarSalidaConsola(Runnable accion) {
+        PrintStream salidaOriginal = System.out;
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(buffer));
+        try {
+            accion.run();
+        } finally {
+            System.setOut(salidaOriginal);
+        }
+        return buffer.toString();
+    }
 }
