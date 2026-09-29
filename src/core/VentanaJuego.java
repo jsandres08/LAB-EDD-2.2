@@ -4,6 +4,8 @@
  */
 package core;
 
+import javax.swing.tree.DefaultMutableTreeNode;
+
 /**
  *
  * @author LENOVO
@@ -210,43 +212,34 @@ private void procesarOpcion(String opcion) {
 // 4) Menú: Jugadores y Árboles (construido por código, no por diseñador)
 // ---------------------------------------------------------------
 private javax.swing.JMenuBar crearMenuBar() {
-    javax.swing.JMenuBar menuBar = new javax.swing.JMenuBar();
+       javax.swing.JMenuBar menuBar = new javax.swing.JMenuBar();
 
-    javax.swing.JMenu menuJugadores = new javax.swing.JMenu("Jugadores");
-    for (Jugador jugador : gameEngine.getTodosLosJugadores()) {
-        javax.swing.JMenuItem item = new javax.swing.JMenuItem(jugador.getNombre());
-        item.addActionListener(e -> mostrarEstadoJugador(jugador));
-        menuJugadores.add(item);
+        javax.swing.JMenu menuJugadores = new javax.swing.JMenu("Jugadores");
+        for (Jugador jugador : gameEngine.getTodosLosJugadores()) {
+            javax.swing.JMenuItem item = new javax.swing.JMenuItem(jugador.getNombre());
+            item.addActionListener(e -> mostrarEstadoJugador(jugador));
+            menuJugadores.add(item);
+        }
+        menuBar.add(menuJugadores);
+
+        javax.swing.JMenu menuArboles = new javax.swing.JMenu("Árboles");
+        javax.swing.JMenuItem itemDecisiones = new javax.swing.JMenuItem("Árbol de mis decisiones");
+        itemDecisiones.addActionListener(e -> mostrarArbolDecisiones());
+        menuArboles.add(itemDecisiones);
+        menuBar.add(menuArboles);
+
+        return menuBar;
+}
+ 
+
+ private void mostrarEstadoJugador(Jugador jugador) {
+        javax.swing.JOptionPane.showMessageDialog(this,
+                jugador.toString(),
+                "Estado de " + jugador.getNombre(),
+                javax.swing.JOptionPane.INFORMATION_MESSAGE);
     }
-    menuBar.add(menuJugadores);
-
-    javax.swing.JMenu menuArboles = new javax.swing.JMenu("Árboles");
-
-    javax.swing.JMenuItem itemArbolDecision = new javax.swing.JMenuItem("Árbol de decisión (recorrido)");
-    itemArbolDecision.addActionListener(e -> mostrarTexto(
-            "Árbol de Decisión - Recorrido",
-            gameEngine.obtenerRecorridoArbolDecision()));
-
-    javax.swing.JMenuItem itemArbolClasificacion = new javax.swing.JMenuItem("Árbol de clasificación (recorrido)");
-    itemArbolClasificacion.addActionListener(e -> mostrarTexto(
-            "Árbol de Clasificación - Recorrido",
-            gameEngine.obtenerRecorridoArbolClasificacion()));
-
-    menuArboles.add(itemArbolDecision);
-    menuArboles.add(itemArbolClasificacion);
-    menuBar.add(menuArboles);
-
-    return menuBar;
-}
-
-private void mostrarEstadoJugador(Jugador jugador) {
-    javax.swing.JOptionPane.showMessageDialog(
-            this,
-            jugador.toString(),
-            "Estado de " + jugador.getNombre(),
-            javax.swing.JOptionPane.INFORMATION_MESSAGE);
-}
-
+ 
+        
 private void mostrarTexto(String titulo, String contenido) {
     javax.swing.JTextArea area = new javax.swing.JTextArea(
             contenido == null || contenido.isEmpty() ? "(sin datos para mostrar)" : contenido);
@@ -258,7 +251,14 @@ private void mostrarTexto(String titulo, String contenido) {
 
     javax.swing.JOptionPane.showMessageDialog(this, scroll, titulo, javax.swing.JOptionPane.PLAIN_MESSAGE);
 }
-    
+ private void mostrarArbolDecisiones() {
+        DefaultMutableTreeNode raiz = new DefaultMutableTreeNode("Recorrido de la partida");
+
+        java.util.List<RegistroDecision> historial = gameEngine.getHistorial();
+        if (historial.isEmpty()) {
+            raiz.add(new DefaultMutableTreeNode("Aún no se ha tomado ninguna decisión"));
+        }
+ }
     /**
      * @param args the command line arguments
      */
