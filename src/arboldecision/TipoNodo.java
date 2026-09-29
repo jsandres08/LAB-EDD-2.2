@@ -1,2 +1,4 @@
 package arboldecision;
-public enum TipoNodo { PUBLICACION, PREGUNTA, RESULTADO }
+public enum TipoNodo {
+    RAIZ, PUBLICACION, PREGUNTA, RESULTADO
+}

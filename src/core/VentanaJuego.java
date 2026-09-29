@@ -1,24 +1,56 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
- */
 package core;
 
-import javax.swing.tree.DefaultMutableTreeNode;
+import java.awt.CardLayout;
+import java.awt.GraphicsEnvironment;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import javax.swing.AbstractAction;
+import javax.swing.JComponent;
+import javax.swing.KeyStroke;
+import ui.Iconos;
 
 /**
  *
  * @author LENOVO
  */
 public class VentanaJuego extends javax.swing.JFrame {
-    
-    private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(VentanaJuego.class.getName());
 
-    /**
-     * Creates new form VentanaJuego
-     */
-    public VentanaJuego() {
+    static final String MENU = "menu";
+    static final String JUEGO = "juego";
+    static final String ARBOLES = "arboles";
+    static final String ESTADISTICAS = "estadisticas";
+    static final String AYUDA = "ayuda";
+
+    private final GameEngine gameEngine;
+    private final Map<String, Pantalla> pantallas = new LinkedHashMap<>();
+    private String actual;
+    private String retorno = MENU;
+
+    public VentanaJuego(GameEngine gameEngine) {
+        this.gameEngine = gameEngine;
         initComponents();
+        setIconImage(Iconos.imagenAplicacion(64));
+        setResizable(false);
+        setBounds(GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds());
+
+        registrar(MENU, new PantallaMenu(this, gameEngine));
+        registrar(JUEGO, new PantallaJuego(this, gameEngine));
+        registrar(ARBOLES, new PantallaArboles(this, gameEngine));
+        registrar(ESTADISTICAS, new PantallaEstadisticas(this, gameEngine));
+        registrar(AYUDA, new PantallaAyuda(this));
+
+        getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
+                .put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "volver");
+        getRootPane().getActionMap().put("volver", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                volver();
+            }
+        });
+
+        mostrar(MENU);
     }
 
     /**
@@ -30,265 +62,52 @@ public class VentanaJuego extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        lblTurno = new javax.swing.JLabel();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        txtPublicacion = new javax.swing.JTextArea();
-        panelBotones = new javax.swing.JPanel();
-        lblTemporizador = new javax.swing.JLabel();
+        panelPantallas = new javax.swing.JPanel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("Alcalde Digital");
 
-        lblTurno.setText("jLabel1");
-
-        txtPublicacion.setColumns(20);
-        txtPublicacion.setRows(5);
-        jScrollPane1.setViewportView(txtPublicacion);
-
-        lblTemporizador.setText("dsdsa");
-
-        javax.swing.GroupLayout panelBotonesLayout = new javax.swing.GroupLayout(panelBotones);
-        panelBotones.setLayout(panelBotonesLayout);
-        panelBotonesLayout.setHorizontalGroup(
-            panelBotonesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelBotonesLayout.createSequentialGroup()
-                .addContainerGap(32, Short.MAX_VALUE)
-                .addComponent(lblTemporizador, javax.swing.GroupLayout.PREFERRED_SIZE, 726, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
-        );
-        panelBotonesLayout.setVerticalGroup(
-            panelBotonesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(panelBotonesLayout.createSequentialGroup()
-                .addGap(32, 32, 32)
-                .addComponent(lblTemporizador, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(68, Short.MAX_VALUE))
-        );
-
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(170, 170, 170)
-                        .addComponent(panelBotones, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(286, 286, 286)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 563, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(137, 137, 137)
-                        .addComponent(lblTurno)))
-                .addContainerGap(147, Short.MAX_VALUE))
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addGap(35, 35, 35)
-                .addComponent(lblTurno, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 202, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 45, Short.MAX_VALUE)
-                .addComponent(panelBotones, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(32, 32, 32))
-        );
+        panelPantallas.setLayout(new java.awt.CardLayout());
+        getContentPane().add(panelPantallas, java.awt.BorderLayout.CENTER);
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-    
-    /*
- * PEGAR TODO ESTE BLOQUE DENTRO DE LA CLASE VentanaJuego, DESPUÉS del
- * método initComponents() generado por NetBeans (fuera del bloque
- * protegido // <editor-fold> ... </editor-fold>).
- *
- * Requisito: en el diseñador (modo Design), los componentes deben
- * tener EXACTAMENTE estos "Variable Name" (Properties > Code > Variable Name):
- *   - JLabel   lblTurno         (NORTH)
- *   - JPanel   panelCentral     (CENTER, layout BorderLayout)
- *   - JTextArea txtPublicacion  (dentro de un JScrollPane, dentro de panelCentral, CENTER)
- *   - JLabel   lblTemporizador  (dentro de panelCentral, SOUTH)
- *   - JPanel   panelIndicadores (EAST)
- *   - JLabel   lblConfianza, lblDesinformacion (dentro de panelIndicadores)
- *   - JPanel   panelBotones     (SOUTH, vacío, layout GridLayout)
- *
- * No hace falta arrastrar ningún JMenuBar: el menú se arma por código
- * en el constructor porque el número de jugadores puede variar.
- */
 
-// ---------------------------------------------------------------
-// 1) REEMPLAZA el constructor vacío que generó el asistente por este:
-// ---------------------------------------------------------------
-private GameEngine gameEngine;
-private javax.swing.Timer temporizador;
-private int segundosRestantes;
-private static final int SEGUNDOS_INICIALES = 10;
-
-public VentanaJuego(GameEngine gameEngine) {
-    initComponents();
-    this.gameEngine = gameEngine;
-
-    setJMenuBar(crearMenuBar());
-
-    temporizador = new javax.swing.Timer(1000, this::onTick);
-
-    actualizarPantalla();
-}
-
-// ---------------------------------------------------------------
-// 2) Temporizador
-// ---------------------------------------------------------------
-private void onTick(java.awt.event.ActionEvent e) {
-    segundosRestantes--;
-    lblTemporizador.setText("Tiempo: " + segundosRestantes + "s");
-    if (segundosRestantes <= 0) {
-        temporizador.stop();
-        manejarTiempoAgotado();
+    private void registrar(String nombre, Pantalla pantalla) {
+        pantallas.put(nombre, pantalla);
+        panelPantallas.add((JComponent) pantalla, nombre);
     }
-}
 
-private void manejarTiempoAgotado() {
-    java.util.Set<String> opciones = gameEngine.getOpcionesDisponibles();
-    if (!opciones.isEmpty()) {
-        procesarOpcion(opciones.iterator().next());
+    void mostrar(String nombre) {
+        if (nombre.equals(actual)) {
+            return;
+        }
+        boolean esSecundaria = ARBOLES.equals(nombre) || ESTADISTICAS.equals(nombre) || AYUDA.equals(nombre);
+        if (esSecundaria && (MENU.equals(actual) || JUEGO.equals(actual))) {
+            retorno = actual;
+        }
+        if (actual != null) {
+            pantallas.get(actual).alOcultar();
+        }
+        actual = nombre;
+        ((CardLayout) panelPantallas.getLayout()).show(panelPantallas, nombre);
+        pantallas.get(nombre).alMostrar();
     }
-}
 
-private void reiniciarTemporizador() {
-    segundosRestantes = SEGUNDOS_INICIALES;
-    lblTemporizador.setText("Tiempo: " + segundosRestantes + "s");
-    temporizador.restart();
-}
-
-// ---------------------------------------------------------------
-// 3) Refresco de pantalla a partir del estado del GameEngine
-// ---------------------------------------------------------------
-private void actualizarPantalla() {
-    Jugador jugadorActual = gameEngine.getJugadorActual();
-    lblTurno.setText("Turno de: " + jugadorActual.getNombre()
-            + " (" + jugadorActual.getRol() + ")");
-
-    txtPublicacion.setText(gameEngine.getTextoActual());
-
-    java.util.Set<String> opciones = gameEngine.getOpcionesDisponibles();
-    generarBotonesDinamicos(opciones);
-
-    if (opciones.isEmpty()) {
-        lblTemporizador.setText("Fin del recorrido");
-        temporizador.stop();
-    } else {
-        reiniciarTemporizador();
-    }
-}
-
-private void generarBotonesDinamicos(java.util.Set<String> opciones) {
-    panelBotones.removeAll();
-
-    if (opciones.isEmpty()) {
-        panelBotones.setLayout(new java.awt.GridLayout(1, 1));
-        javax.swing.JLabel lblFin = new javax.swing.JLabel(
-                "Partida / recorrido finalizado", javax.swing.SwingConstants.CENTER);
-        lblFin.setFont(new java.awt.Font("SansSerif", java.awt.Font.ITALIC, 14));
-        panelBotones.add(lblFin);
-    } else {
-        panelBotones.setLayout(new java.awt.GridLayout(1, opciones.size(), 10, 10));
-        for (String opcion : opciones) {
-            javax.swing.JButton boton = new javax.swing.JButton(opcion);
-            boton.setFont(new java.awt.Font("SansSerif", java.awt.Font.PLAIN, 14));
-            boton.addActionListener(e -> procesarOpcion(opcion));
-            panelBotones.add(boton);
+    void volver() {
+        if (ARBOLES.equals(actual) || ESTADISTICAS.equals(actual) || AYUDA.equals(actual)) {
+            mostrar(retorno);
+        } else if (JUEGO.equals(actual)) {
+            mostrar(MENU);
         }
     }
 
-    panelBotones.revalidate();
-    panelBotones.repaint();
-}
-
-private void procesarOpcion(String opcion) {
-    temporizador.stop();
-    gameEngine.procesarDecision(opcion);
-    actualizarPantalla();
-}
-
-// ---------------------------------------------------------------
-// 4) Menú: Jugadores y Árboles (construido por código, no por diseñador)
-// ---------------------------------------------------------------
-private javax.swing.JMenuBar crearMenuBar() {
-       javax.swing.JMenuBar menuBar = new javax.swing.JMenuBar();
-
-        javax.swing.JMenu menuJugadores = new javax.swing.JMenu("Jugadores");
-        for (Jugador jugador : gameEngine.getTodosLosJugadores()) {
-            javax.swing.JMenuItem item = new javax.swing.JMenuItem(jugador.getNombre());
-            item.addActionListener(e -> mostrarEstadoJugador(jugador));
-            menuJugadores.add(item);
-        }
-        menuBar.add(menuJugadores);
-
-        javax.swing.JMenu menuArboles = new javax.swing.JMenu("Árboles");
-        javax.swing.JMenuItem itemDecisiones = new javax.swing.JMenuItem("Árbol de mis decisiones");
-        itemDecisiones.addActionListener(e -> mostrarArbolDecisiones());
-        menuArboles.add(itemDecisiones);
-        menuBar.add(menuArboles);
-
-        return menuBar;
-}
- 
-
- private void mostrarEstadoJugador(Jugador jugador) {
-        javax.swing.JOptionPane.showMessageDialog(this,
-                jugador.toString(),
-                "Estado de " + jugador.getNombre(),
-                javax.swing.JOptionPane.INFORMATION_MESSAGE);
-    }
- 
-        
-private void mostrarTexto(String titulo, String contenido) {
-    javax.swing.JTextArea area = new javax.swing.JTextArea(
-            contenido == null || contenido.isEmpty() ? "(sin datos para mostrar)" : contenido);
-    area.setEditable(false);
-    area.setFont(new java.awt.Font("Monospaced", java.awt.Font.PLAIN, 13));
-
-    javax.swing.JScrollPane scroll = new javax.swing.JScrollPane(area);
-    scroll.setPreferredSize(new java.awt.Dimension(520, 380));
-
-    javax.swing.JOptionPane.showMessageDialog(this, scroll, titulo, javax.swing.JOptionPane.PLAIN_MESSAGE);
-}
- private void mostrarArbolDecisiones() {
-        DefaultMutableTreeNode raiz = new DefaultMutableTreeNode("Recorrido de la partida");
-
-        java.util.List<RegistroDecision> historial = gameEngine.getHistorial();
-        if (historial.isEmpty()) {
-            raiz.add(new DefaultMutableTreeNode("Aún no se ha tomado ninguna decisión"));
-        }
- }
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ReflectiveOperationException | javax.swing.UnsupportedLookAndFeelException ex) {
-            logger.log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(() -> new VentanaJuego().setVisible(true));
+    void salir() {
+        dispose();
+        System.exit(0);
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JLabel lblTemporizador;
-    private javax.swing.JLabel lblTurno;
-    private javax.swing.JPanel panelBotones;
-    private javax.swing.JTextArea txtPublicacion;
+    private javax.swing.JPanel panelPantallas;
     // End of variables declaration//GEN-END:variables
 }

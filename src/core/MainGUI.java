@@ -1,16 +1,12 @@
-/*
- * Punto de entrada gráfico. Reemplaza el flujo de prueba por consola
- * de Main.java: en vez de imprimir texto, abre la ventana Swing
- * (InterfazJuego) que consume el mismo GameEngine.
- */
 package core;
 
 import arbolclasificacion.ArbolClasi;
-import arbolclasificacion.Publicacion;
 import arboldecision.ArbolDecision;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import javax.swing.SwingUtilities;
+import ui.Tema;
 
 /**
  *
@@ -18,33 +14,28 @@ import javax.swing.SwingUtilities;
  */
 public class MainGUI {
 
+    private static final int PUBLICACIONES_POR_PARTIDA = 8;
+
     public static void main(String[] args) {
-        // 1. Jugadores (igual que en Main.java original)
+        System.setProperty("awt.useSystemAAFontSettings", "off");
+        System.setProperty("swing.aatext", "false");
         List<Jugador> jugadores = new ArrayList<>();
         jugadores.add(new Jugador("Ana", RolJugador.CIUDADANO));
         jugadores.add(new Jugador("Luis", RolJugador.PERIODISTA));
         jugadores.add(new Jugador("Pedro", RolJugador.INFLUENCER));
-        // jugadores.add(new Jugador("María", RolJugador.ALCALDE)); // opcional, hasta 4
+        jugadores.add(new Jugador("María", RolJugador.ALCALDE));
 
         Partida partida = new Partida(jugadores);
+        Random azar = new Random();
 
-        // 2. Árboles ya implementados por Persona 1 y Persona 2
         ArbolDecision arbolDecision = new ArbolDecision();
         ArbolClasi arbolClasificacion = new ArbolClasi();
+        CatalogoPublicaciones.cargar(arbolDecision, arbolClasificacion, azar, PUBLICACIONES_POR_PARTIDA);
 
-        // 3. Publicaciones de ejemplo
-        arbolClasificacion.insertarPublicacion(
-                new Publicacion(1, "Beber cloro elimina virus.", "Anónimo", false, "Rumor"));
-        arbolClasificacion.insertarPublicacion(
-                new Publicacion(2, "Suspenden clases mañana.", "Vecino", false, "Rumor"));
-        arbolClasificacion.insertarPublicacion(
-                new Publicacion(3, "Nueva vacuna aprobada.", "Alcaldía", true, "Salud"));
+        GameEngine engine = new GameEngine(partida, arbolDecision, arbolClasificacion, azar);
 
-        // 4. Motor del juego (Persona 4)
-        GameEngine engine = new GameEngine(partida, arbolDecision, arbolClasificacion);
-
-        // 5. Lanzar la GUI (Persona 3) en el hilo de eventos de Swing
         SwingUtilities.invokeLater(() -> {
+            Tema.instalar();
             VentanaJuego ventana = new VentanaJuego(engine);
             ventana.setVisible(true);
         });

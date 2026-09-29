@@ -1,131 +1,178 @@
-  package arboldecision;
+package arboldecision;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 public class ArbolDecision {
 
-    private NodoDecision raiz, nodoActual;
-    private final List<NodoDecision> publicaciones = new ArrayList<>();
-    private int indicePublicacion = 0;
+    private NodoDecision raiz;
 
     public ArbolDecision() {
-        cargar();
-        nodoActual = raiz;
+        this.raiz = null;
     }
 
-    public NodoDecision getNodoActual() {
-        return nodoActual;
-    }
-
-    public void reiniciar() {
-        nodoActual = raiz;
-        indicePublicacion = 0;
-    }
-
-    public void avanzar(String op) {
-        NodoDecision hijo = nodoActual.obtenerHijo(op);
-        if (hijo != null) {
-            nodoActual = hijo;
-            int i = publicaciones.indexOf(hijo);
-            if (i >= 0) {
-                indicePublicacion = i;
-            }
-        }
-    }
-
-    public Set<String> getOpcionesDisponibles() {
-        return nodoActual.getHijos().keySet();
-    }
-
-    public boolean hayMasPublicaciones() {
-        return indicePublicacion + 1 < publicaciones.size();
-    }
-
-    public boolean siguientePublicacion() {
-        if (!hayMasPublicaciones()) {
-            return false;
-        }
-        indicePublicacion++;
-        nodoActual = publicaciones.get(indicePublicacion);
-        return true;
+    public NodoDecision getRaiz() {
+        return raiz;
     }
 
     public void insertar(String[] ruta, String opcion, NodoDecision nuevo) {
-        NodoDecision a = raiz;
-        for (String r : ruta) {
-            a = a.obtenerHijo(r);
-            if (a == null) return;
+        if (this.raiz == null) {
+            this.raiz = nuevo;
+        } else {
+            insertarRec(this.raiz, ruta, 0, opcion, nuevo);
         }
-        a.agregarHijo(opcion, nuevo);
+    }
+
+    private void insertarRec(NodoDecision nodo, String[] ruta, int i, String opcion, NodoDecision nuevo) {
+        if (nodo == null) {
+            return;
+        }
+        if (i == ruta.length) {
+            nodo.agregarHijo(opcion, nuevo);
+            return;
+        }
+        insertarRec(nodo.obtenerHijo(ruta[i]), ruta, i + 1, opcion, nuevo);
+    }
+
+    public NodoDecision buscar(String[] ruta) {
+        return buscarRec(this.raiz, ruta, 0);
+    }
+
+    private NodoDecision buscarRec(NodoDecision nodo, String[] ruta, int i) {
+        if (nodo == null || i == ruta.length) {
+            return nodo;
+        }
+        return buscarRec(nodo.obtenerHijo(ruta[i]), ruta, i + 1);
     }
 
     public void eliminar(String[] ruta) {
-        NodoDecision a = raiz;
-        for (int i = 0; i < ruta.length - 1; i++) {
-            a = a.obtenerHijo(ruta[i]);
-            if (a == null) return;
+        if (ruta.length == 0) {
+            this.raiz = null;
+        } else {
+            eliminarRec(this.raiz, ruta, 0);
         }
-        a.eliminarHijo(ruta[ruta.length - 1]);
+    }
+
+    private void eliminarRec(NodoDecision nodo, String[] ruta, int i) {
+        if (nodo == null) {
+            return;
+        }
+        if (i == ruta.length - 1) {
+            nodo.eliminarHijo(ruta[i]);
+            return;
+        }
+        eliminarRec(nodo.obtenerHijo(ruta[i]), ruta, i + 1);
+    }
+
+    public List<NodoDecision> buscarPorTipo(TipoNodo tipo) {
+        List<NodoDecision> resultados = new ArrayList<>();
+        buscarPorTipoRec(this.raiz, tipo, resultados);
+        return resultados;
+    }
+
+    private void buscarPorTipoRec(NodoDecision nodo, TipoNodo tipo, List<NodoDecision> resultados) {
+        if (nodo == null) {
+            return;
+        }
+        if (nodo.getTipo() == tipo) {
+            resultados.add(nodo);
+        }
+        for (NodoDecision hijo : nodo.getHijos().values()) {
+            buscarPorTipoRec(hijo, tipo, resultados);
+        }
+    }
+
+    public List<NodoDecision> preorden() {
+        List<NodoDecision> orden = new ArrayList<>();
+        preordenRec(this.raiz, orden);
+        return orden;
+    }
+
+    private void preordenRec(NodoDecision nodo, List<NodoDecision> orden) {
+        if (nodo == null) {
+            return;
+        }
+        orden.add(nodo);
+        for (NodoDecision hijo : nodo.getHijos().values()) {
+            preordenRec(hijo, orden);
+        }
+    }
+
+    public List<NodoDecision> postorden() {
+        List<NodoDecision> orden = new ArrayList<>();
+        postordenRec(this.raiz, orden);
+        return orden;
+    }
+
+    private void postordenRec(NodoDecision nodo, List<NodoDecision> orden) {
+        if (nodo == null) {
+            return;
+        }
+        for (NodoDecision hijo : nodo.getHijos().values()) {
+            postordenRec(hijo, orden);
+        }
+        orden.add(nodo);
     }
 
     public void recorrerDFS() {
-        dfs(raiz, "");
+        dfs(this.raiz, "");
     }
 
-    private void dfs(NodoDecision n, String s) {
-        if (n == null) return;
-        System.out.println(s + "- " + n.getTexto() + " [" + n.getTipo() + "]");
-        for (String op : n.getHijos().keySet()) {
-            System.out.println(s + "  Opcion: " + op);
-            dfs(n.obtenerHijo(op), s + "    ");
+    private void dfs(NodoDecision nodo, String sangria) {
+        if (nodo == null) {
+            return;
+        }
+        System.out.println(sangria + "- " + nodo.getTexto() + " [" + nodo.getTipo() + "]");
+        for (String opcion : nodo.getHijos().keySet()) {
+            System.out.println(sangria + "  Opcion: " + opcion);
+            dfs(nodo.obtenerHijo(opcion), sangria + "    ");
         }
     }
 
-    // En los RESULTADO, el tercer parámetro indica si la decisión fue correcta.
-    private void cargar() {
-        // ---------- PUBLICACIÓN 1 (FALSA) ----------
-        raiz = new NodoDecision("PUBLICACION 1: Beber cloro elimina virus.", TipoNodo.PUBLICACION);
-        NodoDecision verificar = new NodoDecision("¿Deseas verificar la información?", TipoNodo.PREGUNTA);
-        raiz.agregarHijo("Verificar", verificar);
-        raiz.agregarHijo("Compartir", new NodoDecision("Compartiste información falsa.", TipoNodo.RESULTADO, false));
-        raiz.agregarHijo("Ignorar", new NodoDecision("Ignoraste la publicación.", TipoNodo.RESULTADO, true));
-        verificar.agregarHijo("Sí", new NodoDecision("Correcto: era falsa.", TipoNodo.RESULTADO, true));
-        verificar.agregarHijo("No", new NodoDecision("Caíste en la desinformación.", TipoNodo.RESULTADO, false));
-        publicaciones.add(raiz);
+    public int peso(NodoDecision nodo) {
+        if (nodo == null) {
+            return 0;
+        }
+        int total = 1;
+        for (NodoDecision hijo : nodo.getHijos().values()) {
+            total += peso(hijo);
+        }
+        return total;
+    }
 
-        // ---------- PUBLICACIÓN 2 (RUMOR) ----------
-        NodoDecision p2 = new NodoDecision("PUBLICACION 2: Suspenden clases mañana.", TipoNodo.PUBLICACION);
-        raiz.agregarHijo("Siguiente publicación", p2);
-        NodoDecision fuente = new NodoDecision("¿Consultar fuente oficial?", TipoNodo.PREGUNTA);
-        p2.agregarHijo("Verificar", fuente);
-        p2.agregarHijo("Compartir", new NodoDecision("Generaste pánico.", TipoNodo.RESULTADO, false));
-        p2.agregarHijo("Ignorar", new NodoDecision("Ignoraste un rumor.", TipoNodo.RESULTADO, true));
-        fuente.agregarHijo("Sí", new NodoDecision("Era un rumor.", TipoNodo.RESULTADO, true));
-        fuente.agregarHijo("No", new NodoDecision("Creíste el rumor.", TipoNodo.RESULTADO, false));
-        publicaciones.add(p2);
+    public int hojas(NodoDecision nodo) {
+        if (nodo == null) {
+            return 0;
+        }
+        if (nodo.getHijos().isEmpty()) {
+            return 1;
+        }
+        int total = 0;
+        for (NodoDecision hijo : nodo.getHijos().values()) {
+            total += hojas(hijo);
+        }
+        return total;
+    }
 
-        // ---------- PUBLICACIÓN 3 (VERDADERA) ----------
-        NodoDecision p3 = new NodoDecision("PUBLICACION 3: Nueva vacuna aprobada.", TipoNodo.PUBLICACION);
-        p2.agregarHijo("Siguiente publicación", p3);
-        NodoDecision oficial = new NodoDecision("¿Consultar página oficial?", TipoNodo.PREGUNTA);
-        p3.agregarHijo("Verificar", oficial);
-        p3.agregarHijo("Compartir", new NodoDecision("Compartiste una noticia verdadera.", TipoNodo.RESULTADO, true));
-        p3.agregarHijo("Ignorar", new NodoDecision("Ignoraste una noticia verdadera.", TipoNodo.RESULTADO, false));
-        oficial.agregarHijo("Sí", new NodoDecision("Confirmaste la noticia.", TipoNodo.RESULTADO, true));
-        oficial.agregarHijo("No", new NodoDecision("No verificaste la fuente.", TipoNodo.RESULTADO, false));
-        publicaciones.add(p3);
+    public int altura(NodoDecision nodo) {
+        if (nodo == null) {
+            return -1;
+        }
+        int max = -1;
+        for (NodoDecision hijo : nodo.getHijos().values()) {
+            max = Math.max(max, altura(hijo));
+        }
+        return max + 1;
+    }
 
-        // ---------- PUBLICACIÓN 4 (FAKE NEWS) ----------
-        NodoDecision p4 = new NodoDecision("PUBLICACION 4: Murió un famoso.", TipoNodo.PUBLICACION);
-        p3.agregarHijo("Siguiente publicación", p4);
-        NodoDecision noticias = new NodoDecision("¿Buscar noticias confiables?", TipoNodo.PREGUNTA);
-        p4.agregarHijo("Verificar", noticias);
-        p4.agregarHijo("Compartir", new NodoDecision("Era una fake news.", TipoNodo.RESULTADO, false));
-        p4.agregarHijo("Ignorar", new NodoDecision("Ignoraste una fake news.", TipoNodo.RESULTADO, true));
-        noticias.agregarHijo("Sí", new NodoDecision("Descubriste el montaje.", TipoNodo.RESULTADO, true));
-        noticias.agregarHijo("No", new NodoDecision("Caíste en la fake news.", TipoNodo.RESULTADO, false));
-        publicaciones.add(p4);
+    public int grado(NodoDecision nodo) {
+        if (nodo == null) {
+            return 0;
+        }
+        int grado = nodo.getHijos().size();
+        for (NodoDecision hijo : nodo.getHijos().values()) {
+            grado = Math.max(grado, grado(hijo));
+        }
+        return grado;
     }
 }
